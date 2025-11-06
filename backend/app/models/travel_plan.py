@@ -23,4 +23,4 @@ class TravelPlan(Base):
     
     # 关系
     user = relationship("User")
-    expenses = relationship("Expense", back_populates="travel_plan")
+    expenses = relationship("Expense", back_populates="travel_plan", cascade="all, delete-orphan")

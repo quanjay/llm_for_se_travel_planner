@@ -14,8 +14,37 @@
       </div>
     </div>
 
+    <!-- 地图导航 -->
+    <el-card v-if="travelPlan && travelPlan.itinerary && travelPlan.itinerary.length > 0" class="map-card">
+      <div class="card-header clickable" @click="toggleMapExpanded">
+        <div class="header-left">
+          <el-icon class="collapse-icon" :class="{ 'is-expanded': isMapExpanded }">
+            <ArrowDown />
+          </el-icon>
+          <h3>地图导航</h3>
+          <el-tag type="info">{{ getAllLocationsCount() }} 个地点</el-tag>
+        </div>
+        <el-button 
+          text 
+          @click.stop="toggleMapExpanded"
+          style="color: #409EFF;"
+        >
+          {{ isMapExpanded ? '收起' : '展开' }}
+        </el-button>
+      </div>
+      <el-collapse-transition>
+        <div v-show="isMapExpanded" class="map-container">
+          <TravelMap 
+            ref="travelMapRef"
+            :itinerary="travelPlan.itinerary" 
+            :destination="travelPlan.destination" 
+          />
+        </div>
+      </el-collapse-transition>
+    </el-card>
+
     <!-- 行程信息 -->
-    <el-row v-if="travelPlan" :gutter="20">
+    <el-row v-if="travelPlan" :gutter="20" style="margin-top: 20px;">
       <!-- 基本信息 -->
       <el-col :xs="24" :md="8">
         <el-card class="info-card">
@@ -102,6 +131,8 @@
                       v-for="(activity, index) in day.activities" 
                       :key="index"
                       class="activity-item"
+                      :class="{ 'has-location': activity.location }"
+                      @click="activity.location ? navigateToLocation(day, index) : null"
                     >
                       <div class="activity-icon">
                         <el-icon :color="getActivityColor(activity.type)">
@@ -112,7 +143,12 @@
                       <div class="activity-content">
                         <div class="activity-header">
                           <h5>{{ activity.name }}</h5>
-                          <span class="activity-time">{{ activity.start_time }} - {{ activity.end_time }}</span>
+                          <div class="activity-header-right">
+                            <span class="activity-time">{{ activity.start_time }} - {{ activity.end_time }}</span>
+                            <el-tooltip v-if="activity.location" content="点击在地图上查看" placement="top">
+                              <el-icon class="nav-icon"><MapLocation /></el-icon>
+                            </el-tooltip>
+                          </div>
                         </div>
                         
                         <p class="activity-description">{{ activity.description }}</p>
@@ -162,7 +198,8 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { 
-  ArrowLeft, 
+  ArrowLeft,
+  ArrowDown,
   MapLocation, 
   Van, 
   House, 
@@ -173,6 +210,7 @@ import {
 } from '@element-plus/icons-vue'
 import { travelPlanApi } from '@/api/travel-plan'
 import type { TravelPlan } from '@/types'
+import TravelMap from '@/components/TravelMap.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -180,6 +218,8 @@ const router = useRouter()
 // 响应式数据
 const travelPlan = ref<TravelPlan | null>(null)
 const loading = ref(true)
+const isMapExpanded = ref(false)  // 地图默认收起
+const travelMapRef = ref<InstanceType<typeof TravelMap> | null>(null)  // 地图组件引用
 
 // 获取行程详情
 const fetchTravelPlan = async () => {
@@ -288,6 +328,60 @@ const getActivityColor = (type: string) => {
   return colorMap[type] || '#606266'
 }
 
+// 切换地图展开/收起
+const toggleMapExpanded = () => {
+  isMapExpanded.value = !isMapExpanded.value
+}
+
+// 导航到地图上的位置
+const navigateToLocation = async (day: any, activityIndex: number) => {
+  if (!travelPlan.value?.itinerary) return
+  
+  // 计算全局位置索引（跨天）
+  let globalIndex = 0
+  for (let i = 0; i < travelPlan.value.itinerary.length; i++) {
+    const currentDay = travelPlan.value.itinerary[i]
+    if (currentDay.day === day.day) {
+      globalIndex += activityIndex
+      break
+    }
+    globalIndex += currentDay.activities?.length || 0
+  }
+  
+  // 展开地图
+  if (!isMapExpanded.value) {
+    isMapExpanded.value = true
+    // 等待地图渲染
+    await new Promise(resolve => setTimeout(resolve, 300))
+  }
+  
+  // 滚动到地图位置
+  const mapCard = document.querySelector('.map-card')
+  if (mapCard) {
+    mapCard.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+  
+  // 调用地图组件的聚焦方法
+  if (travelMapRef.value && typeof travelMapRef.value.focusLocation === 'function') {
+    await new Promise(resolve => setTimeout(resolve, 400))
+    travelMapRef.value.focusLocation(globalIndex)
+  }
+}
+
+// 获取所有地点数量
+const getAllLocationsCount = () => {
+  if (!travelPlan.value || !travelPlan.value.itinerary) return 0
+  
+  let count = 0
+  travelPlan.value.itinerary.forEach(day => {
+    if (day.activities && Array.isArray(day.activities)) {
+      count += day.activities.length
+    }
+  })
+  
+  return count
+}
+
 // 页面加载
 onMounted(() => {
   fetchTravelPlan()
@@ -317,6 +411,50 @@ onMounted(() => {
 .header-actions {
   display: flex;
   gap: 12px;
+}
+
+.map-card {
+  margin-bottom: 20px;
+}
+
+.map-card .card-header {
+  margin-bottom: 0;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s;
+  padding: 8px;
+  margin: -8px;
+  border-radius: 4px;
+}
+
+.map-card .card-header:hover {
+  background-color: #f5f7fa;
+}
+
+.map-card .card-header.clickable {
+  cursor: pointer;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.collapse-icon {
+  transition: transform 0.3s;
+  color: #409EFF;
+}
+
+.collapse-icon.is-expanded {
+  transform: rotate(180deg);
+}
+
+.map-container {
+  margin-top: 20px;
+  height: 450px;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .info-card,
@@ -396,6 +534,17 @@ onMounted(() => {
   padding: 12px;
   background: #f9f9f9;
   border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.activity-item.has-location {
+  cursor: pointer;
+}
+
+.activity-item.has-location:hover {
+  background: #e6f7ff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+  transform: translateX(4px);
 }
 
 .activity-icon {
@@ -423,11 +572,28 @@ onMounted(() => {
 .activity-header h5 {
   margin: 0;
   color: #2c3e50;
+  flex: 1;
+}
+
+.activity-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .activity-time {
   color: #909399;
   font-size: 12px;
+}
+
+.nav-icon {
+  color: #409EFF;
+  font-size: 16px;
+  transition: transform 0.3s;
+}
+
+.activity-item.has-location:hover .nav-icon {
+  transform: scale(1.2);
 }
 
 .activity-description {
