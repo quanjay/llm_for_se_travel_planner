@@ -3,14 +3,58 @@ import type { RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 const routes: RouteRecordRaw[] = [
+  // 带导航布局的页面
   {
     path: '/',
-    name: 'Home',
-    component: () => import('@/views/Home.vue'),
-    meta: {
-      title: '首页'
-    }
+    component: () => import('@/components/AppLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'Home',
+        component: () => import('@/views/Home.vue'),
+        meta: {
+          title: '首页'
+        }
+      },
+      {
+        path: '/planning',
+        name: 'Planning',
+        component: () => import('@/views/Planning/Index.vue'),
+        meta: {
+          title: '行程规划',
+          requiresAuth: true
+        }
+      },
+      {
+        path: '/planning/:id',
+        name: 'PlanningDetail',
+        component: () => import('@/views/Planning/Detail.vue'),
+        meta: {
+          title: '行程详情',
+          requiresAuth: true
+        }
+      },
+      {
+        path: '/expenses',
+        name: 'Expenses',
+        component: () => import('@/views/Expenses/Index.vue'),
+        meta: {
+          title: '费用管理',
+          requiresAuth: true
+        }
+      },
+      {
+        path: '/profile',
+        name: 'Profile',
+        component: () => import('@/views/Profile/Index.vue'),
+        meta: {
+          title: '个人中心',
+          requiresAuth: true
+        }
+      }
+    ]
   },
+  // 无布局的页面（登录、注册等）
   {
     path: '/login',
     name: 'Login',
@@ -30,42 +74,6 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/planning',
-    name: 'Planning',
-    component: () => import('@/views/Planning/Index.vue'),
-    meta: {
-      title: '行程规划',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/planning/:id',
-    name: 'PlanningDetail',
-    component: () => import('@/views/Planning/Detail.vue'),
-    meta: {
-      title: '行程详情',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/expenses',
-    name: 'Expenses',
-    component: () => import('@/views/Expenses/Index.vue'),
-    meta: {
-      title: '费用管理',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/profile',
-    name: 'Profile',
-    component: () => import('@/views/Profile/Index.vue'),
-    meta: {
-      title: '个人中心',
-      requiresAuth: true
-    }
-  },
-  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/Error/NotFound.vue'),
@@ -81,7 +89,7 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const userStore = useUserStore()
   
   // 设置页面标题

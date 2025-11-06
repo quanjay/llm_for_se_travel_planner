@@ -1,39 +1,5 @@
 <template>
   <div class="home">
-    <!-- 顶部导航栏 -->
-    <el-header class="header">
-      <div class="header-content">
-        <div class="logo">
-          <h2>AI旅行规划师</h2>
-        </div>
-        <div class="nav-actions">
-          <template v-if="userStore.isLoggedIn">
-            <el-button type="text" @click="$router.push('/planning')">我的行程</el-button>
-            <el-button type="text" @click="$router.push('/expenses')">费用管理</el-button>
-            <el-dropdown trigger="click">
-              <span class="user-info">
-                <el-avatar :size="32" :src="userStore.user?.avatar">
-                  {{ userStore.user?.username?.charAt(0) }}
-                </el-avatar>
-                <span class="username">{{ userStore.user?.username }}</span>
-                <el-icon><ArrowDown /></el-icon>
-              </span>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item @click="$router.push('/profile')">个人中心</el-dropdown-item>
-                  <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </template>
-          <template v-else>
-            <el-button @click="$router.push('/login')">登录</el-button>
-            <el-button type="primary" @click="$router.push('/register')">注册</el-button>
-          </template>
-        </div>
-      </div>
-    </el-header>
-
     <!-- 主要内容区域 -->
     <div class="main-content">
       <!-- 欢迎区域 -->
@@ -121,8 +87,7 @@ import {
   Plus, 
   Location, 
   Money, 
-  Upload, 
-  ArrowDown 
+  Upload
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 
@@ -185,63 +150,12 @@ const handleImageError = (event: Event) => {
   img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjVGN0ZBIi8+CjxwYXRoIGQ9Ik0xMzAgMTAwSDEyMFY5MEgxMzBWMTAwWk0xNTAgMTAwSDE0MFY5MEgxNTBWMTAwWk0xNzAgMTAwSDE2MFY5MEgxNzBWMTAwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'
 }
 
-// 退出登录
-const handleLogout = () => {
-  userStore.logout()
-  ElMessage.success('已成功退出登录')
-  router.push('/')
-}
+
 </script>
 
 <style scoped>
 .home {
   min-height: 100vh;
-}
-
-.header {
-  background: white;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  padding: 0;
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 60px;
-  padding: 0 20px;
-}
-
-.logo h2 {
-  color: #409EFF;
-  margin: 0;
-}
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.user-info:hover {
-  background-color: #f5f7fa;
-}
-
-.username {
-  font-size: 14px;
-  color: #606266;
 }
 
 .main-content {

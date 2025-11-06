@@ -1,10 +1,9 @@
 import axios from 'axios'
-import type { ApiResponse } from '@/types'
 
 // 创建axios实例
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
-  timeout: 10000,
+  timeout: 150000, // 150秒，确保能等待后端完整的重试过程（2次重试 + 等待时间）
   headers: {
     'Content-Type': 'application/json'
   }

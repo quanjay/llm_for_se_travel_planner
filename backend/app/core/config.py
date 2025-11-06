@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     
     # 通义千问API配置
     QIANWEN_API_KEY: str = os.getenv("QIANWEN_API_KEY", "")
-    QIANWEN_API_URL: str = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation"
+    QIANWEN_API_URL: str = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
     
     class Config:
         env_file = ".env"

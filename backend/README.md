@@ -1,23 +1,26 @@
-# AI旅行规划师后端API
+# Backend - FastAPI Travel Planner API
 
-基于FastAPI构建的AI旅行规划师后端服务。
+AI旅行规划师的后端API服务，基于FastAPI框架开发，提供用户认证、行程规划、费用管理等核心功能。
 
-## 功能特性
+## 🚀 功能特性
 
-- 用户注册和登录系统
-- JWT身份验证
-- 旅行计划管理
-- 费用记录和分析
-- RESTful API设计
+- ✅ **用户认证系统** - 注册、登录、JWT Token管理
+- ✅ **智能行程规划** - 集成通义千问AI，自动生成个性化行程
+- ✅ **费用管理** - 预算分析、支出记录、统计报表
+- ✅ **RESTful API** - 标准化的API接口设计
+- ✅ **数据验证** - Pydantic数据验证和序列化
+- ✅ **安全认证** - JWT身份验证和权限控制
 
-## 技术栈
+## 🛠 技术栈
 
-- **框架**: FastAPI 0.104.1
-- **数据库**: MySQL 8.0
-- **ORM**: SQLAlchemy 2.0
-- **认证**: JWT (python-jose)
-- **密码加密**: bcrypt (passlib)
-- **数据迁移**: Alembic
+- **框架**: FastAPI 0.104.1 - 高性能异步Web框架
+- **数据库**: MySQL 8.0 - 关系型数据库
+- **ORM**: SQLAlchemy 2.0 - 强大的对象关系映射
+- **认证**: JWT (python-jose) - JSON Web Token
+- **密码加密**: bcrypt (passlib) - 安全密码加密
+- **数据迁移**: Alembic - 数据库版本控制
+- **数据验证**: Pydantic - 类型验证和序列化
+- **AI集成**: 通义千问API - 智能行程生成
 
 ## 项目结构
 

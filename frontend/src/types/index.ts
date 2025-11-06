@@ -66,7 +66,7 @@ export interface Expense {
   category: 'transport' | 'accommodation' | 'food' | 'attraction' | 'shopping' | 'other'
   amount: number
   description: string
-  date: string
+  expense_date: string
   created_at: string
 }
 
@@ -74,6 +74,7 @@ export interface BudgetAnalysis {
   total_budget: number
   total_spent: number
   remaining: number
+  percentage_used: number
   category_breakdown: CategoryExpense[]
 }
 
