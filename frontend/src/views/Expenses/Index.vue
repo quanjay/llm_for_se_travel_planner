@@ -17,6 +17,13 @@
             :value="plan.id"
           />
         </el-select>
+        <ExpenseVoiceRecorder 
+          :show-text="true"
+          size="default"
+          @recognized="handleVoiceExpense"
+          v-if="selectedTravelPlan"
+          style="margin-right: 12px;"
+        />
         <el-button 
           type="primary" 
           @click="showAddExpenseDialog = true"
@@ -217,6 +224,7 @@ import { Plus } from '@element-plus/icons-vue'
 import { travelPlanApi } from '@/api/travel-plan'
 import { expenseApi } from '@/api/expense'
 import type { TravelPlan, Expense, BudgetAnalysis } from '@/types'
+import ExpenseVoiceRecorder from '@/components/ExpenseVoiceRecorder.vue'
 
 // 响应式数据
 const travelPlans = ref<TravelPlan[]>([])
@@ -368,6 +376,47 @@ const deleteExpense = async (expenseId: number) => {
     if (error !== 'cancel') {
       ElMessage.error(error.message || '删除失败')
     }
+  }
+}
+
+// 处理语音识别的费用
+const handleVoiceExpense = async (result: any) => {
+  const expense = result.expense
+  
+  if (!expense.amount) {
+    ElMessage.warning('未识别到金额，请手动输入')
+    return
+  }
+  
+  // 自动填充表单
+  expenseForm.category = expense.category || 'other'
+  expenseForm.amount = expense.amount
+  expenseForm.description = expense.description || '语音记录'
+  expenseForm.expense_date = expense.expense_date
+  
+  // 直接保存费用（或者可以打开对话框让用户确认）
+  try {
+    saving.value = true
+    
+    const expenseData = {
+      category: expenseForm.category as Expense['category'],
+      amount: expenseForm.amount,
+      description: expenseForm.description,
+      expense_date: expenseForm.expense_date,
+      travel_plan_id: selectedTravelPlan.value!
+    }
+    
+    await expenseApi.createExpense(expenseData)
+    ElMessage.success(`已添加: ${expenseForm.description} ${expenseForm.amount}元`)
+    
+    resetForm()
+    fetchExpenses()
+    fetchBudgetAnalysis()
+    
+  } catch (error: any) {
+    ElMessage.error(error.message || '添加费用失败')
+  } finally {
+    saving.value = false
   }
 }
 

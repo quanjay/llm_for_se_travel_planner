@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     QIANWEN_API_KEY: str = os.getenv("QIANWEN_API_KEY", "")
     QIANWEN_API_URL: str = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
     
+    # 科大讯飞语音识别API配置
+    XFYUN_APP_ID: str = os.getenv("XFYUN_APP_ID", "")
+    XFYUN_API_KEY: str = os.getenv("XFYUN_API_KEY", "")
+    XFYUN_API_SECRET: str = os.getenv("XFYUN_API_SECRET", "")
+    
     class Config:
         env_file = ".env"
 

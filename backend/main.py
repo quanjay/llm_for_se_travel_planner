@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.routes import auth, travel_plans, expenses
+from app.api.routes import auth, travel_plans, expenses, voice
 import logging
 
 # 配置日志
@@ -29,6 +29,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
 app.include_router(travel_plans.router, prefix="/api/travel-plans", tags=["行程规划"])
 app.include_router(expenses.router, prefix="/api/expenses", tags=["费用管理"])
+app.include_router(voice.router, prefix="/api/voice", tags=["语音识别"])
 
 @app.get("/")
 async def root():

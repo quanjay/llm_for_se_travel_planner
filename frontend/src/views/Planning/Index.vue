@@ -69,6 +69,32 @@
       width="600px"
       :close-on-click-modal="false"
     >
+      <!-- 语音输入选项卡 -->
+      <el-tabs v-model="inputMode" class="input-tabs">
+        <el-tab-pane label="文字输入" name="text">
+          <!-- 表单输入 -->
+        </el-tab-pane>
+        <el-tab-pane label="语音输入" name="voice">
+          <div class="voice-input-container">
+            <el-alert
+              title="语音输入提示"
+              type="info"
+              :closable="false"
+              show-icon
+            >
+              请描述您的旅行计划，例如："我想去北京玩5天，预算5000元，2个人，喜欢美食和文化"
+            </el-alert>
+            <VoiceRecorder @recognized="handleVoiceRecognized" @error="handleVoiceError" />
+            <div v-if="voiceRecognizedText" class="recognized-text">
+              <el-text type="success">
+                <el-icon><Check /></el-icon>
+                识别结果: {{ voiceRecognizedText }}
+              </el-text>
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+
       <el-form
         ref="planFormRef"
         :model="planForm"
@@ -161,10 +187,12 @@ import {
   MapLocation, 
   Calendar, 
   Money, 
-  User 
+  User,
+  Check
 } from '@element-plus/icons-vue'
 import { travelPlanApi } from '@/api/travel-plan'
 import type { TravelPlan } from '@/types'
+import VoiceRecorder from '@/components/VoiceRecorder.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -176,6 +204,8 @@ const editingPlan = ref<TravelPlan | null>(null)
 const creating = ref(false)
 const generating = ref(false)
 const planFormRef = ref<FormInstance>()
+const inputMode = ref<'text' | 'voice'>('text')
+const voiceRecognizedText = ref('')
 
 // 表单数据
 const planForm = reactive({
@@ -359,6 +389,57 @@ const deletePlan = async (planId: number) => {
   }
 }
 
+// 处理语音识别结果
+const handleVoiceRecognized = (result: any) => {
+  voiceRecognizedText.value = result.text
+  const intent = result.intent
+  
+  // 自动填充表单
+  if (intent.destination) {
+    planForm.destination = intent.destination
+  }
+  
+  if (intent.budget) {
+    planForm.budget = intent.budget
+  }
+  
+  if (intent.people_count) {
+    planForm.people_count = intent.people_count
+  }
+  
+  if (intent.preferences && intent.preferences.length > 0) {
+    planForm.preferences = intent.preferences
+  }
+  
+  // 如果识别到天数，计算日期范围
+  if (intent.days) {
+    const today = new Date()
+    const endDate = new Date(today)
+    endDate.setDate(today.getDate() + intent.days - 1)
+    
+    planForm.dateRange = [
+      today.toISOString().split('T')[0],
+      endDate.toISOString().split('T')[0]
+    ]
+  }
+  
+  // 自动生成标题
+  if (intent.destination) {
+    const days = intent.days ? `${intent.days}天` : ''
+    planForm.title = `${intent.destination}${days}之旅`
+  }
+  
+  // 切换到文字输入标签页，让用户确认
+  inputMode.value = 'text'
+  
+  ElMessage.success('已自动填充表单，请确认信息')
+}
+
+// 处理语音识别错误
+const handleVoiceError = (error: string) => {
+  console.error('语音识别错误:', error)
+}
+
 // 重置表单
 const resetForm = () => {
   editingPlan.value = null
@@ -369,6 +450,8 @@ const resetForm = () => {
   planForm.people_count = 1
   planForm.preferences = []
   planForm.special_requirements = ''
+  voiceRecognizedText.value = ''
+  inputMode.value = 'text'
 }
 
 // 获取状态标签类型
@@ -476,6 +559,26 @@ onMounted(() => {
 .dialog-footer {
   display: flex;
   gap: 12px;
+}
+
+.input-tabs {
+  margin-bottom: 20px;
+}
+
+.voice-input-container {
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.recognized-text {
+  padding: 12px;
+  background: #f0f9ff;
+  border-radius: 4px;
+  width: 100%;
+  text-align: center;
 }
 
 @media (max-width: 768px) {
