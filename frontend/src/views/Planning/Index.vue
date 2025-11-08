@@ -227,7 +227,19 @@ const planFormRules: FormRules = {
     { required: true, message: '请输入目的地', trigger: 'blur' }
   ],
   dateRange: [
-    { required: true, message: '请选择出行日期', trigger: 'change' }
+    { required: true, message: '请选择出行日期', trigger: 'change' },
+    { 
+      validator: (_rule: any, value: string[], callback: any) => {
+        if (!value || value.length !== 2) {
+          callback(new Error('请选择完整的日期范围'))
+        } else if (new Date(value[0]) > new Date(value[1])) {
+          callback(new Error('结束日期不能早于开始日期'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'change'
+    }
   ],
   budget: [
     { required: true, message: '请输入预算', trigger: 'blur' }
@@ -319,6 +331,9 @@ const generateAIPlan = async () => {
       preferences: planForm.preferences,
       special_requirements: planForm.special_requirements
     }
+
+    console.log('发送AI生成请求:', requestData)
+    console.log('日期范围:', planForm.dateRange)
 
     const response = await travelPlanApi.generateTravelPlan(requestData)
     

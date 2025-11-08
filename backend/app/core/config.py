@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     XFYUN_API_KEY: str = os.getenv("XFYUN_API_KEY", "")
     XFYUN_API_SECRET: str = os.getenv("XFYUN_API_SECRET", "")
     
+    # Supabase 云端存储配置
+    ENABLE_CLOUD_SYNC: bool = os.getenv("ENABLE_CLOUD_SYNC", "False").lower() == "true"
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+    SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
+    SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "")
+    
     class Config:
         env_file = ".env"
 
