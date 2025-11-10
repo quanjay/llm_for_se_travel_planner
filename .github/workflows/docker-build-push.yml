@@ -76,6 +76,9 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VITE_AMAP_KEY=${{ secrets.VITE_AMAP_KEY }}
+            VITE_AMAP_SECURITY_CODE=${{ secrets.VITE_AMAP_SECURITY_CODE }}
 
       - name: Image digest
         run: echo "Image pushed with digest ${{ steps.build-push.outputs.digest }}"
