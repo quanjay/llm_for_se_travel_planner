@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # 后端服务
+  backend:
+    image: crpi-kbqtqje5us9bmrzs.cn-hangzhou.personal.cr.aliyuncs.com/travel-planner/travel-planner-backend:latest
+    container_name: travel-planner-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.prod
+    restart: unless-stopped
+    networks:
+      - travel-planner-net
+
+  # 前端服务
+  frontend:
+    image: crpi-kbqtqje5us9bmrzs.cn-hangzhou.personal.cr.aliyuncs.com/travel-planner/travel-planner-frontend:latest
+    container_name: travel-planner-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - travel-planner-net
+
+networks:
+  travel-planner-net:
+    name: travel-planner-network
+    driver: bridge
